@@ -1,0 +1,28 @@
+{
+  "name": "team-maker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@prisma/client": "^6.19.2",
+    "@supabase/supabase-js": "^2.97.0",
+    "googleapis": "^171.4.0",
+    "lucide-react": "^0.575.0",
+    "next": "16.1.6",
+    "next-auth": "^5.0.0-beta.30",
+    "prisma": "^6.19.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6"
+  }
+}

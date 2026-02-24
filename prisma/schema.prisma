@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  name          String?
+  image         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  ownedClubs    Club[]       @relation("ClubOwner")
+  memberships   ClubMember[]
+  accounts      Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Club {
+  id        String       @id @default(cuid())
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  ownerId   String
+  owner     User         @relation("ClubOwner", fields: [ownerId], references: [id])
+  members   ClubMember[]
+  sessions  Session[]
+}
+
+model ClubMember {
+  id     String @id @default(cuid())
+  clubId String
+  userId String
+  role   String @default("ADMIN") // ADMIN
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  clubId    String
+  name      String
+  sheetUrl  String?
+  sheetId   String?
+  numTeams        Int      @default(2)
+  maxTeamMembers  Int      @default(8)
+  status          String   @default("DRAFT") // DRAFT, ACTIVE, COMPLETED
+  autoSync        Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  teams     Team[]
+  players   Player[]
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  sessionId String
+  name      String
+  orderNum  Int      @default(0)
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  players   Player[]
+}
+
+model Player {
+  id           String   @id @default(cuid())
+  sessionId    String
+  teamId       String?
+  name         String
+  gender       String   @default("Unknown")
+  skillLevel   Int      @default(3) // 1-5
+  status       String   @default("ACTIVE") // ACTIVE, WAITLIST
+  uniqueTeamId String?
+  sheetRow     Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  team         Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+}
